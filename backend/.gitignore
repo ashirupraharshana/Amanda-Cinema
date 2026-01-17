@@ -1,0 +1,9 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+application.yml
+application-*.yml
+*.log
+*.jks
+*.p12
+*.key
+*.pem
