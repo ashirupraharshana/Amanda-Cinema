@@ -2,9 +2,10 @@
 
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
 
 export default function CustomerDashboard() {
-  const { logout, isLoading } = useAuth();
+  const { isLoading } = useAuth();
   const [userInfo, setUserInfo] = useState({
     userId: "",
     name: "",
@@ -74,7 +75,6 @@ export default function CustomerDashboard() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0f0f0f]">
         <div className="text-center">
-          <div className="text-6xl mb-4">🎬</div>
           <h2 className="text-2xl font-bold text-[#d4af37]">Loading...</h2>
         </div>
       </div>
@@ -83,26 +83,8 @@ export default function CustomerDashboard() {
 
   return (
     <main className="min-h-screen bg-[#0f0f0f] text-[#f5f5f5]">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-[#1a1a1a]">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold text-[#d4af37]">Amanda Cinema</h1>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-sm font-medium text-[#d4af37]">
-                {userInfo.name || "Guest"}
-              </div>
-              <div className="text-xs text-[#f5f5f5]/60">{userInfo.email}</div>
-            </div>
-            <button
-              onClick={logout}
-              className="rounded-lg bg-[#800020] px-4 py-2 text-sm font-semibold text-[#f5f5f5] hover:bg-[#600018] transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-12">
@@ -115,52 +97,87 @@ export default function CustomerDashboard() {
           </p>
         </div>
 
-        {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 hover:border-[#d4af37]/50 transition cursor-pointer">
-            <div className="text-4xl mb-4">🎬</div>
-            <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
-              Now Showing
-            </h3>
-            <p className="text-[#f5f5f5]/60 mb-4">
-              Check out the latest movies in theaters
-            </p>
-            <button className="text-[#d4af37] hover:text-[#f5f5f5] font-medium">
-              Browse Movies →
-            </button>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-[#f5f5f5]/60">Total Bookings</h3>
+            </div>
+            <p className="text-3xl font-bold text-[#d4af37]">0</p>
+            <p className="text-xs text-[#f5f5f5]/40 mt-1">All time</p>
           </div>
 
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 hover:border-[#d4af37]/50 transition cursor-pointer">
-            <div className="text-4xl mb-4">🎟️</div>
-            <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
-              My Bookings
-            </h3>
-            <p className="text-[#f5f5f5]/60 mb-4">
-              View and manage your ticket reservations
-            </p>
-            <button className="text-[#d4af37] hover:text-[#f5f5f5] font-medium">
-              View Bookings →
-            </button>
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-[#f5f5f5]/60">Upcoming Shows</h3>
+            </div>
+            <p className="text-3xl font-bold text-[#d4af37]">0</p>
+            <p className="text-xs text-[#f5f5f5]/40 mt-1">This month</p>
           </div>
 
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6 hover:border-[#d4af37]/50 transition cursor-pointer">
-            <div className="text-4xl mb-4">⭐</div>
-            <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
-              Rewards
-            </h3>
-            <p className="text-[#f5f5f5]/60 mb-4">
-              Earn points with every booking
-            </p>
-            <button className="text-[#d4af37] hover:text-[#f5f5f5] font-medium">
-              View Rewards →
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-[#f5f5f5]/60">Reward Points</h3>
+            </div>
+            <p className="text-3xl font-bold text-[#d4af37]">0</p>
+            <p className="text-xs text-[#f5f5f5]/40 mt-1">Earn more!</p>
+          </div>
+
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-[#f5f5f5]/60">Movies Watched</h3>
+            </div>
+            <p className="text-3xl font-bold text-[#d4af37]">0</p>
+            <p className="text-xs text-[#f5f5f5]/40 mt-1">This year</p>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-[#d4af37] mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button className="bg-[#1a1a1a] border border-gray-800 hover:border-[#d4af37] rounded-lg p-6 text-left transition group">
+              <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
+                Browse Movies
+              </h3>
+              <p className="text-[#f5f5f5]/60 mb-4">
+                Discover the latest movies showing in our theaters
+              </p>
+              <span className="text-[#d4af37] group-hover:text-[#f5f5f5] font-medium">
+                Explore Now →
+              </span>
+            </button>
+
+            <button className="bg-[#1a1a1a] border border-gray-800 hover:border-[#d4af37] rounded-lg p-6 text-left transition group">
+              <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
+                Book Tickets
+              </h3>
+              <p className="text-[#f5f5f5]/60 mb-4">
+                Reserve your seats for upcoming showtimes
+              </p>
+              <span className="text-[#d4af37] group-hover:text-[#f5f5f5] font-medium">
+                Book Now →
+              </span>
+            </button>
+
+            <button className="bg-[#1a1a1a] border border-gray-800 hover:border-[#d4af37] rounded-lg p-6 text-left transition group">
+              <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
+                Upcoming Events
+              </h3>
+              <p className="text-[#f5f5f5]/60 mb-4">
+                Check out special screenings and events
+              </p>
+              <span className="text-[#d4af37] group-hover:text-[#f5f5f5] font-medium">
+                View Events →
+              </span>
             </button>
           </div>
         </div>
 
         {/* User Info Box */}
-        <div className="mt-8 bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg p-6">
+        <div className="bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-[#d4af37] mb-3">
-            🎉 Account Information
+            Account Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
@@ -181,7 +198,7 @@ export default function CustomerDashboard() {
             </div>
             <div>
               <span className="text-[#f5f5f5]/60">Status:</span>
-              <span className="ml-2 text-green-400">● Active</span>
+              <span className="ml-2 text-green-400">Active</span>
             </div>
           </div>
           <div className="mt-4 pt-4 border-t border-[#d4af37]/20">

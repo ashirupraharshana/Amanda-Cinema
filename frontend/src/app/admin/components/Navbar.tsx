@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function Navbar() {
+export default function AdminNavbar() {
   const { logout } = useAuth();
   const pathname = usePathname();
   const [userInfo, setUserInfo] = useState({
@@ -19,33 +19,38 @@ export default function Navbar() {
     const storedEmail = localStorage.getItem("userEmail");
 
     setUserInfo({
-      name: storedName || "Guest",
+      name: storedName || "Admin",
       email: storedEmail || "",
     });
   }, []);
 
   const navLinks = [
-    { href: "/customer/dashboard", label: "Dashboard" },
-    { href: "/customer/movies", label: "Movies" },
-    { href: "/customer/bookings", label: "My Bookings" },
-    { href: "/customer/profile", label: "Profile" },
+    { href: "/admin/dashboard", label: "Dashboard" },
+    { href: "/admin/movies", label: "Movies" },
+    { href: "/admin/theaters", label: "Theaters" },
+    { href: "/admin/showtimes", label: "Showtimes" },
+    { href: "/admin/bookings", label: "Bookings" },
+    { href: "/admin/users", label: "Users" },
   ];
 
   return (
     <header className="border-b border-gray-800 bg-[#1a1a1a] sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
         {/* Logo */}
-        <Link href="/customer/dashboard" className="flex items-center gap-2">
+        <Link href="/admin/dashboard" className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-[#d4af37]">Amanda Cinema</h1>
+          <span className="rounded-full bg-[#d4af37] px-3 py-1 text-xs font-bold text-[#0f0f0f]">
+            ADMIN
+          </span>
         </Link>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-4">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`px-3 py-2 rounded-lg transition ${
+              className={`px-3 py-2 rounded-lg transition text-sm ${
                 pathname === link.href
                   ? "bg-[#d4af37] text-[#0f0f0f] font-semibold"
                   : "text-[#f5f5f5]/80 hover:text-[#d4af37] hover:bg-[#0f0f0f]"
@@ -74,19 +79,19 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden border-t border-gray-800 px-6 py-3">
-        <nav className="flex items-center justify-around gap-2">
+      <div className="lg:hidden border-t border-gray-800 px-4 py-3 overflow-x-auto">
+        <nav className="flex items-center gap-2 min-w-max">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition text-xs ${
+              className={`px-3 py-2 rounded-lg transition text-xs whitespace-nowrap ${
                 pathname === link.href
                   ? "bg-[#d4af37] text-[#0f0f0f] font-semibold"
                   : "text-[#f5f5f5]/80"
               }`}
             >
-              <span>{link.label}</span>
+              {link.label}
             </Link>
           ))}
         </nav>
