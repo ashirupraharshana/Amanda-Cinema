@@ -3,6 +3,7 @@
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import AdminNavbar from "../components/Navbar";
 
 interface User {
   id: number;
@@ -18,9 +19,8 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
-  const { logout, isLoading, userRole } = useAuth();
+  const { isLoading, userRole } = useAuth();
   const router = useRouter();
-  const [userEmail, setUserEmail] = useState<string>("");
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loadingData, setLoadingData] = useState(true);
@@ -40,25 +40,7 @@ export default function AdminDashboard() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        // Get user info from localStorage first
-        const storedEmail = localStorage.getItem("userEmail");
-        if (storedEmail) {
-          setUserEmail(storedEmail);
-        }
-
         try {
-          // Fetch current user info
-          const userResponse = await fetch("http://localhost:8080/api/auth/me", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            setUserEmail(userData.email);
-          }
-
           // Fetch all users
           const usersResponse = await fetch("http://localhost:8080/api/admin/users", {
             headers: {
@@ -107,7 +89,6 @@ export default function AdminDashboard() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0f0f0f]">
         <div className="text-center">
-          <div className="text-6xl mb-4">⚡</div>
           <h2 className="text-2xl font-bold text-[#d4af37]">Loading Admin Dashboard...</h2>
         </div>
       </div>
@@ -116,26 +97,8 @@ export default function AdminDashboard() {
 
   return (
     <main className="min-h-screen bg-[#0f0f0f] text-[#f5f5f5]">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-[#1a1a1a]">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-[#d4af37]">Amanda Cinema</h1>
-            <span className="rounded-full bg-[#d4af37] px-3 py-1 text-xs font-bold text-[#0f0f0f]">
-              ADMIN
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-[#f5f5f5]/60">{userEmail}</span>
-            <button
-              onClick={logout}
-              className="rounded-lg bg-[#800020] px-4 py-2 text-sm font-semibold text-[#f5f5f5] hover:bg-[#600018] transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <AdminNavbar />
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-12">
@@ -159,7 +122,6 @@ export default function AdminDashboard() {
           <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-[#f5f5f5]/60">Total Users</h3>
-              <span className="text-2xl">👥</span>
             </div>
             <p className="text-3xl font-bold text-[#d4af37]">
               {stats?.totalUsers || 0}
@@ -169,7 +131,6 @@ export default function AdminDashboard() {
           <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-[#f5f5f5]/60">Active Bookings</h3>
-              <span className="text-2xl">🎟️</span>
             </div>
             <p className="text-3xl font-bold text-[#d4af37]">0</p>
           </div>
@@ -177,7 +138,6 @@ export default function AdminDashboard() {
           <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-[#f5f5f5]/60">Movies</h3>
-              <span className="text-2xl">🎬</span>
             </div>
             <p className="text-3xl font-bold text-[#d4af37]">0</p>
           </div>
@@ -185,7 +145,6 @@ export default function AdminDashboard() {
           <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-[#f5f5f5]/60">Revenue</h3>
-              <span className="text-2xl">💰</span>
             </div>
             <p className="text-3xl font-bold text-[#d4af37]">$0</p>
           </div>
@@ -194,7 +153,6 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <button className="bg-[#1a1a1a] border border-gray-800 hover:border-[#d4af37] rounded-lg p-6 text-left transition group">
-            <div className="text-4xl mb-4">➕</div>
             <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
               Add Movie
             </h3>
@@ -204,7 +162,6 @@ export default function AdminDashboard() {
           </button>
 
           <button className="bg-[#1a1a1a] border border-gray-800 hover:border-[#d4af37] rounded-lg p-6 text-left transition group">
-            <div className="text-4xl mb-4">🎭</div>
             <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
               Manage Shows
             </h3>
@@ -214,7 +171,6 @@ export default function AdminDashboard() {
           </button>
 
           <button className="bg-[#1a1a1a] border border-gray-800 hover:border-[#d4af37] rounded-lg p-6 text-left transition group">
-            <div className="text-4xl mb-4">📊</div>
             <h3 className="text-xl font-semibold text-[#d4af37] mb-2">
               View Reports
             </h3>
