@@ -77,6 +77,36 @@ public class AdminShowtimeController {
         }
     }
 
+    // Get showtimes by movie ID
+    @GetMapping(value = "/movie/{movieId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getShowtimesByMovieId(@PathVariable Long movieId, Authentication authentication) {
+        try {
+            logger.info("Fetching showtimes for movie id: {}", movieId);
+
+            // Verify movie exists
+            Optional<Movie> movieOpt = movieRepository.findById(movieId);
+            if (movieOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Movie not found"));
+            }
+
+            List<Showtime> showtimes = showtimeRepository.findByMovieId(movieId);
+            logger.info("Found {} showtimes for movie id: {}", showtimes.size(), movieId);
+
+            List<Map<String, Object>> showtimeDTOs = showtimes.stream()
+                    .map(this::convertToDTO)
+                    .toList();
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(showtimeDTOs);
+        } catch (Exception e) {
+            logger.error("Error fetching showtimes for movie", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch showtimes: " + e.getMessage()));
+        }
+    }
+
     // Create new showtime
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -215,6 +245,7 @@ public class AdminShowtimeController {
     private Map<String, Object> convertToDTO(Showtime showtime) {
         Map<String, Object> dto = new HashMap<>();
         dto.put("id", showtime.getId());
+        dto.put("movieId", showtime.getMovie().getId());
         dto.put("movie", Map.of(
                 "id", showtime.getMovie().getId(),
                 "title", showtime.getMovie().getTitle()
