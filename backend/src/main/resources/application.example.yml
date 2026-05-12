@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+spring: amanda cinema
+=======
+>>>>>>> feature/admin-manage-movies
 spring:
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=amanda_cinema_db;encrypt=true;trustServerCertificate=true
@@ -35,9 +41,24 @@ spring:
       allowed-headers: "*"
       allow-credentials: true
 
+<<<<<<< HEAD
+=======
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+>>>>>>> feature/admin-manage-movies
 server:
   port: 8080
 
 jwt:
   secret: ${JWT_SECRET:your-very-secure-secret-key-that-is-at-least-256-bits-long-for-hs256-algorithm}
+<<<<<<< HEAD
   expiration: ${JWT_EXPIRATION:86400000}
+=======
+  expiration: ${JWT_EXPIRATION:86400000}
+>>>>>>> Stashed changes
+>>>>>>> feature/admin-manage-movies

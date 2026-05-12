@@ -41,7 +41,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/oauth2/**",
+<<<<<<< HEAD
                                 "/login/**"
+=======
+                                "/login/**",
+                                "/api/movies/**"
+>>>>>>> feature/admin-manage-movies
                         ).permitAll()
                         // Admin endpoints - require authentication
                         .requestMatchers("/api/admin/**").authenticated()
@@ -60,7 +65,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+<<<<<<< HEAD
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+=======
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+>>>>>>> feature/admin-manage-movies
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

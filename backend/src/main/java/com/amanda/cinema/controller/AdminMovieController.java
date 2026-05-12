@@ -21,7 +21,13 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/movies")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(
+        origins = "http://localhost:3000",
+        allowCredentials = "true",
+        allowedHeaders = "*",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+                RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}
+)
 public class AdminMovieController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminMovieController.class);
@@ -492,5 +498,41 @@ public class AdminMovieController {
 
         logger.info("User {} is admin: {}", authentication.getName(), isAdmin);
         return isAdmin;
+    }
+
+    // Set photo as primary
+    @PatchMapping(value = "/{movieId}/photos/{photoId}/set-primary", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional
+    public ResponseEntity<?> setPhotoAsPrimary(@PathVariable Long movieId,
+                                               @PathVariable Long photoId,
+                                               Authentication authentication) {
+        try {
+            if (!isAdmin(authentication)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "Admin access required"));
+            }
+
+            // Unset all primary photos for this movie
+            List<MoviePhoto> photos = moviePhotoRepository.findByMovieId(movieId);
+            photos.forEach(p -> p.setIsPrimary(false));
+            moviePhotoRepository.saveAll(photos);
+
+            // Set the selected one as primary
+            Optional<MoviePhoto> photoOpt = moviePhotoRepository.findById(photoId);
+            if (photoOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Photo not found"));
+            }
+
+            photoOpt.get().setIsPrimary(true);
+            moviePhotoRepository.save(photoOpt.get());
+            moviePhotoRepository.flush();
+
+            return ResponseEntity.ok(Map.of("message", "Primary photo updated"));
+        } catch (Exception e) {
+            logger.error("Error setting primary photo", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to set primary photo: " + e.getMessage()));
+        }
     }
 }
