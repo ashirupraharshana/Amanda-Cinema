@@ -11,11 +11,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3000")
-<<<<<<< HEAD
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-=======
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
->>>>>>> feature/admin-manage-movies
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
