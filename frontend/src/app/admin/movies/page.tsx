@@ -92,6 +92,19 @@ const emptyForm: MovieFormData = {
   status: "ACTIVE",
 };
 
+const genreOptions = [
+  "Action",
+  "Comedy",
+  "Drama",
+  "Romance",
+  "Horror",
+  "Science Fiction (Sci-Fi)",
+  "Fantasy",
+  "Thriller",
+  "Mystery",
+  "Documentary",
+];
+
 export default function ManageMovies() {
   const { isLoading, userRole } = useAuth();
   const router = useRouter();
@@ -904,15 +917,24 @@ const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                     {/* Genre + Rating */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-[#f5f5f5] mb-1">Genre</label>
-                        <input
-                          type="text"
-                          name="genre"
-                          value={formData.genre}
-                          onChange={handleInputChange}
-                          className="w-full bg-[#0f0f0f] border border-gray-800 rounded-lg px-4 py-2 text-[#f5f5f5] focus:outline-none focus:border-[#d4af37]"
-                        />
-                      </div>
+  <label className="block text-sm font-medium text-[#f5f5f5] mb-1">
+    Genre <span className="text-red-400">*</span>
+  </label>
+  <select
+    name="genre"
+    value={formData.genre}
+    onChange={handleInputChange}
+    required
+    className="w-full bg-[#0f0f0f] border border-gray-800 rounded-lg px-4 py-2 text-[#f5f5f5] focus:outline-none focus:border-[#d4af37]"
+  >
+    <option value="">Select genre</option>
+    {genreOptions.map((genre) => (
+      <option key={genre} value={genre}>
+        {genre}
+      </option>
+    ))}
+  </select>
+</div>
                       <div>
                         <label className="block text-sm font-medium text-[#f5f5f5] mb-1">Rating</label>
                         <select
