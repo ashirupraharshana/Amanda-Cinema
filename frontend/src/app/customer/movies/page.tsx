@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
+import { useTheme } from "../../context/ThemeContext";
 
 interface Movie {
   id: number;
@@ -22,6 +23,7 @@ interface Movie {
 }
 
 export default function CustomerMoviesPage() {
+  const { isDark } = useTheme();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
@@ -44,171 +46,150 @@ export default function CustomerMoviesPage() {
   const genres = ["ALL", ...Array.from(new Set(movies.map((m) => m.genre).filter(Boolean)))];
   const filtered = filter === "ALL" ? movies : movies.filter((m) => m.genre === filter);
 
+  const t = {
+    pageBg:       isDark ? "#080808" : "#faf8f4",
+    pageText:     isDark ? "#f0ece4" : "#1a1814",
+    gold:         "#c8a96e",
+    goldMuted:    isDark ? "#9e8a6e" : "#a08a5a",
+    sansFont:     "'Helvetica Neue', Arial, sans-serif",
+    serifFont:    "'Georgia', 'Times New Roman', serif",
+    filterBorder: isDark ? "#2a2a2a" : "#ddd8cc",
+    filterText:   isDark ? "#888" : "#aaa090",
+    cardBg:       isDark ? "#111111" : "#ffffff",
+    cardBorder:   isDark ? "#1a1a1a" : "#eae6de",
+    gradFrom:     isDark ? "rgba(8,8,8,0.97)" : "rgba(20,18,14,0.92)",
+    gradMid:      isDark ? "rgba(8,8,8,0.3)"  : "rgba(20,18,14,0.25)",
+    ratingBg:     isDark ? "rgba(8,8,8,0.85)" : "rgba(20,18,14,0.75)",
+    ratingBorder: isDark ? "#2a2a2a" : "rgba(200,169,110,0.3)",
+    noImgBg:      isDark ? "#1a1a1a" : "#ede9e0",
+    noImgText:    isDark ? "#333" : "#bbb4a0",
+  };
+
   return (
-    <main style={{ minHeight: "100vh", background: "#080808", color: "#f0ece4", fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: t.pageBg,
+        color: t.pageText,
+        fontFamily: t.serifFont,
+        transition: "background 0.4s ease, color 0.4s ease",
+      }}
+    >
       <Navbar />
 
       {/* Hero header */}
-      <section style={{ padding: "72px 48px 48px", maxWidth: 1400, margin: "0 auto" }}>
-        <p style={{ fontSize: 11, letterSpacing: "0.3em", color: "#9e8a6e", textTransform: "uppercase", marginBottom: 16, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+      <section style={{ padding: "clamp(40px,6vw,72px) clamp(20px,4vw,48px) clamp(24px,4vw,48px)", maxWidth: 1400, margin: "0 auto" }}>
+        <p style={{ fontSize: 11, letterSpacing: "0.3em", color: t.goldMuted, textTransform: "uppercase", marginBottom: 16, fontFamily: t.sansFont, transition: "color 0.4s ease" }}>
           Now Showing
         </p>
-        <h1 style={{ fontSize: "clamp(48px, 6vw, 88px)", fontWeight: 400, lineHeight: 1, color: "#f0ece4", margin: "0 0 8px", letterSpacing: "-0.02em" }}>
+        <h1 style={{ fontSize: "clamp(40px,6vw,88px)", fontWeight: 400, lineHeight: 1, color: t.pageText, margin: "0 0 8px", letterSpacing: "-0.02em", transition: "color 0.4s ease" }}>
           What's on
         </h1>
-        <div style={{ width: 64, height: 2, background: "#c8a96e", marginTop: 24 }} />
+        <div style={{ width: 64, height: 2, background: t.gold, marginTop: 24 }} />
       </section>
 
-      {/* Genre filter bar */}
-      <section style={{ padding: "0 48px 48px", maxWidth: 1400, margin: "0 auto" }}>
+      {/* Genre filter */}
+      <section style={{ padding: "0 clamp(20px,4vw,48px) clamp(24px,4vw,48px)", maxWidth: 1400, margin: "0 auto" }}>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {genres.map((g) => (
-            <button
-              key={g}
-              onClick={() => setFilter(g)}
-              style={{
-                padding: "8px 20px",
-                borderRadius: 2,
-                border: filter === g ? "1px solid #c8a96e" : "1px solid #2a2a2a",
-                background: filter === g ? "#c8a96e" : "transparent",
-                color: filter === g ? "#080808" : "#888",
-                fontSize: 11,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                cursor: "pointer",
-                fontFamily: "'Helvetica Neue', Arial, sans-serif",
-                fontWeight: 500,
-                transition: "all 0.2s ease",
-              }}
-            >
-              {g}
-            </button>
-          ))}
+          {genres.map((g) => {
+            const active = filter === g;
+            return (
+              <button
+                key={g}
+                onClick={() => setFilter(g)}
+                style={{
+                  padding: "8px 20px",
+                  borderRadius: 2,
+                  border: active ? `1px solid ${t.gold}` : `1px solid ${t.filterBorder}`,
+                  background: active ? t.gold : "transparent",
+                  color: active ? "#080808" : t.filterText,
+                  fontSize: 11,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  fontFamily: t.sansFont,
+                  fontWeight: 500,
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {g}
+              </button>
+            );
+          })}
         </div>
       </section>
 
       {/* Movies grid */}
-      <section style={{ padding: "0 48px 96px", maxWidth: 1400, margin: "0 auto" }}>
+      <section style={{ padding: "0 clamp(20px,4vw,48px) 96px", maxWidth: 1400, margin: "0 auto" }}>
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "80px 0" }}>
-            <div style={{ width: 1, height: 48, background: "#c8a96e" }} />
-            <p style={{ color: "#888", fontFamily: "'Helvetica Neue', Arial, sans-serif", fontSize: 13, letterSpacing: "0.1em" }}>
-              Loading films...
-            </p>
+            <div style={{ width: 1, height: 48, background: t.gold }} />
+            <p style={{ color: t.filterText, fontFamily: t.sansFont, fontSize: 13, letterSpacing: "0.1em" }}>Loading films...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <p style={{ color: "#555", fontFamily: "'Helvetica Neue', Arial, sans-serif", padding: "80px 0" }}>
-            No films available.
-          </p>
+          <p style={{ color: t.filterText, fontFamily: t.sansFont, padding: "80px 0" }}>No films available.</p>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: 2,
-            }}
-          >
-            {filtered.map((movie, i) => (
-              <Link
-                href={`/customer/movies/${movie.id}`}
-                key={movie.id}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(clamp(200px,25vw,280px),1fr))", gap: 2 }}>
+            {filtered.map((movie) => (
+              <Link href={`/customer/movies/${movie.id}`} key={movie.id} style={{ textDecoration: "none", color: "inherit" }}>
                 <article
+                  className="movie-card"
                   style={{
                     position: "relative",
                     overflow: "hidden",
                     cursor: "pointer",
-                    background: "#111",
+                    background: t.cardBg,
                     display: "block",
+                    border: `1px solid ${t.cardBorder}`,
+                    transition: "border-color 0.4s ease, background 0.4s ease",
                   }}
-                  className="movie-card"
                 >
-                  {/* Poster */}
                   <div style={{ position: "relative", aspectRatio: "2/3", overflow: "hidden" }}>
                     {movie.primaryPhotoBase64 ? (
                       <img
                         src={`data:image/jpeg;base64,${movie.primaryPhotoBase64}`}
                         alt={movie.title}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          display: "block",
-                          transition: "transform 0.6s ease",
-                        }}
                         className="movie-poster-img"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.6s ease" }}
                       />
                     ) : (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          background: "#1a1a1a",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <span style={{ color: "#333", fontSize: 11, letterSpacing: "0.2em", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
-                          NO IMAGE
-                        </span>
+                      <div style={{ width: "100%", height: "100%", background: t.noImgBg, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.4s ease" }}>
+                        <span style={{ color: t.noImgText, fontSize: 11, letterSpacing: "0.2em", fontFamily: t.sansFont }}>NO IMAGE</span>
                       </div>
                     )}
 
-                    {/* Gradient overlay */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        background: "linear-gradient(to top, rgba(8,8,8,0.97) 0%, rgba(8,8,8,0.3) 50%, transparent 100%)",
-                      }}
-                    />
+                    {/* Gradient */}
+                    <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${t.gradFrom} 0%, ${t.gradMid} 50%, transparent 100%)`, transition: "background 0.4s ease" }} />
 
-                    {/* Rating badge */}
+                    {/* Rating */}
                     {movie.rating && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: 16,
-                          right: 16,
-                          background: "rgba(8,8,8,0.85)",
-                          border: "1px solid #2a2a2a",
-                          padding: "4px 10px",
-                          fontSize: 10,
-                          letterSpacing: "0.15em",
-                          color: "#c8a96e",
-                          fontFamily: "'Helvetica Neue', Arial, sans-serif",
-                          fontWeight: 600,
-                        }}
-                      >
+                      <div style={{ position: "absolute", top: 12, right: 12, background: t.ratingBg, border: `1px solid ${t.ratingBorder}`, padding: "4px 10px", fontSize: 10, letterSpacing: "0.15em", color: t.gold, fontFamily: t.sansFont, fontWeight: 600, transition: "background 0.4s ease" }}>
                         {movie.rating}
                       </div>
                     )}
 
-                    {/* Bottom text overlay */}
-                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "24px 20px 20px" }}>
+                    {/* Text overlay */}
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "24px 16px 16px" }}>
                       {movie.genre && (
-                        <p style={{ fontSize: 10, letterSpacing: "0.25em", color: "#c8a96e", textTransform: "uppercase", margin: "0 0 8px", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+                        <p style={{ fontSize: 10, letterSpacing: "0.25em", color: t.gold, textTransform: "uppercase", margin: "0 0 6px", fontFamily: t.sansFont }}>
                           {movie.genre}
                         </p>
                       )}
-                      <h2 style={{ fontSize: 20, fontWeight: 400, color: "#f0ece4", margin: "0 0 6px", lineHeight: 1.2, letterSpacing: "-0.01em" }}>
+                      <h2 style={{ fontSize: "clamp(16px,2vw,20px)", fontWeight: 400, color: "#f0ece4", margin: "0 0 4px", lineHeight: 1.2, letterSpacing: "-0.01em", fontFamily: t.serifFont }}>
                         {movie.title}
                       </h2>
-                      <p style={{ fontSize: 12, color: "#777", margin: 0, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
-                        {movie.durationMinutes} min
-                        {movie.language ? ` · ${movie.language}` : ""}
+                      <p style={{ fontSize: 12, color: "#888", margin: 0, fontFamily: t.sansFont }}>
+                        {movie.durationMinutes} min{movie.language ? ` · ${movie.language}` : ""}
                       </p>
                     </div>
                   </div>
 
-                  {/* Hover CTA strip */}
+                  {/* Hover CTA */}
                   <div
                     className="movie-card-cta"
                     style={{
-                      padding: "14px 20px",
-                      background: "#c8a96e",
+                      padding: "14px 16px",
+                      background: t.gold,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -220,7 +201,7 @@ export default function CustomerMoviesPage() {
                       right: 0,
                     }}
                   >
-                    <span style={{ fontSize: 11, letterSpacing: "0.2em", color: "#080808", fontFamily: "'Helvetica Neue', Arial, sans-serif", fontWeight: 600, textTransform: "uppercase" }}>
+                    <span style={{ fontSize: 11, letterSpacing: "0.2em", color: "#080808", fontFamily: t.sansFont, fontWeight: 600, textTransform: "uppercase" }}>
                       Book Tickets
                     </span>
                     <span style={{ fontSize: 18, color: "#080808" }}>→</span>
@@ -233,11 +214,10 @@ export default function CustomerMoviesPage() {
       </section>
 
       <style>{`
-        .movie-card:hover .movie-card-cta {
-          transform: translateY(0) !important;
-        }
-        .movie-card:hover .movie-poster-img {
-          transform: scale(1.04) !important;
+        .movie-card:hover .movie-card-cta { transform: translateY(0) !important; }
+        .movie-card:hover .movie-poster-img { transform: scale(1.04) !important; }
+        @media (max-width: 480px) {
+          .movie-card-cta { transform: translateY(0) !important; }
         }
       `}</style>
     </main>
