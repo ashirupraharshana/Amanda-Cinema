@@ -253,20 +253,29 @@ export default function ManageMovies() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => setShowtimeFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // ── Pending photo handlers (Add-mode) ──
-const handlePendingPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      showToast("Photo must be under 5 MB", "error");
+const handlePendingPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  try {
+    const optimizedFile = await compressImageToJpeg(file);
+
+    if (optimizedFile.size > 5 * 1024 * 1024) {
+      showToast("Photo must be under 5 MB after compression", "error");
       e.target.value = "";
       return;
     }
-    setPendingPhotoFile(file);
+
+    setPendingPhotoFile(optimizedFile);
+
     const reader = new FileReader();
     reader.onloadend = () => setPendingPhotoPreview(reader.result as string);
-    reader.readAsDataURL(file);
-  };
+    reader.readAsDataURL(optimizedFile);
+  } catch (error) {
+    console.error(error);
+    showToast("Invalid image file", "error");
+  }
+};
 
 const handleAddPendingPhoto = () => {
     if (!pendingPhotoFile) return;
@@ -366,46 +375,54 @@ const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     reader.readAsDataURL(file);
   };
 
-  const handlePhotoUploadInEdit = async () => {
-    if (!photoFile || !editingMovie) {
-      showToast("Please select a photo to upload", "error");
-      return;
+const handlePhotoUploadInEdit = async () => {
+  if (!photoFile || !editingMovie) {
+    showToast("Please select a photo to upload", "error");
+    return;
+  }
+
+  setUploadingPhoto(true);
+
+  try {
+    const token = getToken();
+    if (!token) return;
+
+    const optimizedFile = await compressImageToJpeg(photoFile);
+
+    const fd = new FormData();
+    fd.append("file", optimizedFile);
+    fd.append("isPrimary", String(moviePhotos.length === 0));
+
+    const res = await fetch(`${API_BASE}/api/admin/movies/${editingMovie.id}/photos`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+
+    if (res.ok) {
+      showToast(
+        moviePhotos.length === 0
+          ? "Photo uploaded and set as primary"
+          : "Photo uploaded successfully",
+        "success"
+      );
+      setPhotoFile(null);
+      setPhotoPreview("");
+      const fi = document.getElementById("editPhotoInput") as HTMLInputElement;
+      if (fi) fi.value = "";
+      await fetchMoviePhotos(editingMovie.id);
+      await fetchMovies();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      showToast(err.error || "Failed to upload photo", "error");
     }
-    setUploadingPhoto(true);
-    try {
-      const token = getToken();
-      if (!token) return;
-      const fd = new FormData();
-      fd.append("file", photoFile);
-      fd.append("isPrimary", String(moviePhotos.length === 0));
-      const res = await fetch(`${API_BASE}/api/admin/movies/${editingMovie.id}/photos`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: fd,
-      });
-      if (res.ok) {
-        showToast(
-          moviePhotos.length === 0
-            ? "Photo uploaded and set as primary"
-            : "Photo uploaded successfully",
-          "success"
-        );
-        setPhotoFile(null);
-        setPhotoPreview("");
-        const fi = document.getElementById("editPhotoInput") as HTMLInputElement;
-        if (fi) fi.value = "";
-        await fetchMoviePhotos(editingMovie.id);
-        await fetchMovies();
-      } else {
-        const err = await res.json().catch(() => ({}));
-        showToast(err.error || "Failed to upload photo", "error");
-      }
-    } catch {
-      showToast("Failed to upload photo", "error");
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    showToast("Failed to upload photo", "error");
+  } finally {
+    setUploadingPhoto(false);
+  }
+};
 
   const handleSetPrimaryPhoto = async (movieId: number, photoId: number) => {
     try {
@@ -669,6 +686,61 @@ const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPendingPhotoFile(null);
     setPendingPhotoPreview("");
   };
+
+  const compressImageToJpeg = (
+  file: File,
+  maxWidth = 1600,
+  quality = 0.85
+): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const img = new Image();
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+
+        const scale = Math.min(1, maxWidth / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas not supported"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Image compression failed"));
+              return;
+            }
+
+            const jpegFile = new File(
+              [blob],
+              file.name.replace(/\.[^.]+$/, ".jpg"),
+              { type: "image/jpeg" }
+            );
+
+            resolve(jpegFile);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      img.onerror = () => reject(new Error("Invalid image"));
+      img.src = reader.result as string;
+    };
+
+    reader.onerror = () => reject(new Error("File read failed"));
+    reader.readAsDataURL(file);
+  });
+};
 
   const filteredMovies = movies.filter((movie) => {
     const q = searchQuery.toLowerCase();
