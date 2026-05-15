@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/login/**",
                                 "/api/movies/**",
                                 "/api/bookings/**",
-                                "/api/showtimes/**"
+                                "/api/showtimes/**",
+                                "/api/users/**"
 
                         ).permitAll()
                         // Admin endpoints - require authentication
