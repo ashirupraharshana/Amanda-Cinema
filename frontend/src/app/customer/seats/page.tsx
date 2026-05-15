@@ -130,13 +130,11 @@ function SeatsContent() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        router.push(
-  `/customer/booking-confirmation?bookingCode=${data.bookingCode}&totalAmount=${data.totalAmount}&seats=${selectedSeats.join(",")}&showtimeId=${showtimeId}`
-);
-      } else {
-        setError(data.error || "Booking failed. Please try again.");
-      }
+if (response.ok) {
+  router.push(`/customer/payment?bookingId=${data.bookingId}`);
+} else {
+  setError(data.error || "Booking failed. Please try again.");
+}
     } catch (err) {
       setError("Network error. Please try again.");
       console.error(err);

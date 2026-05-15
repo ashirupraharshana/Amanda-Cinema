@@ -364,8 +364,8 @@ function BookingConfirmationContent() {
               fontFamily: t.sans,
             }}
           >
-            Please present this booking confirmation at the cinema entrance.
-            Arrive at least 15 minutes before the showtime.
+            Your seats have been reserved successfully.
+Please present this confirmation at the cinema and arrive 15 minutes before the screening begins.
           </p>
         </div>
       </div>
