@@ -2,7 +2,9 @@ package com.amanda.cinema.service;
 
 import com.amanda.cinema.dto.UserResponse;
 import com.amanda.cinema.dto.UserUpdateRequest;
+import com.amanda.cinema.model.Booking;
 import com.amanda.cinema.model.User;
+import com.amanda.cinema.repository.BookingRepository;
 import com.amanda.cinema.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +17,13 @@ import java.util.stream.Collectors;
 public class AdminUserService {
 
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
 
-    public AdminUserService(UserRepository userRepository) {
+    public AdminUserService(UserRepository userRepository,
+                            BookingRepository bookingRepository) {
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
     }
-
-
-     // Get all users from database.
-     // Password is not returned because we map User entity to UserResponse DTO.
 
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
@@ -31,18 +32,12 @@ public class AdminUserService {
                 .collect(Collectors.toList());
     }
 
-
-     // Get one user by id.
-
     public UserResponse getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return mapToUserResponse(user);
     }
-
-   // Update user name, email, and role.
-     // If a field is empty or null, it will not be updated.
 
     @Transactional
     public UserResponse updateUser(Long userId, UserUpdateRequest request) {
@@ -55,10 +50,6 @@ public class AdminUserService {
 
         if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
             String newEmail = request.getEmail().trim();
-
-
-             //Check duplicate email.
-             // Allow current user to keep same email.
 
             if (!newEmail.equalsIgnoreCase(user.getEmail())
                     && userRepository.existsByEmail(newEmail)) {
@@ -77,9 +68,6 @@ public class AdminUserService {
         return mapToUserResponse(savedUser);
     }
 
-
-  // Update only user role.
-
     @Transactional
     public UserResponse updateUserRole(Long userId, String role) {
         User user = userRepository.findById(userId)
@@ -92,18 +80,20 @@ public class AdminUserService {
         return mapToUserResponse(savedUser);
     }
 
-
-    // Delete user by id.
-
     @Transactional
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+
+        List<Booking> userBookings = bookingRepository.findByUserId(userId);
+
+        if (!userBookings.isEmpty()) {
+            bookingRepository.deleteAll(userBookings);
+        }
+
         userRepository.delete(user);
     }
-
-      //Only allow valid roles.
 
     private String validateRole(String role) {
         if (role == null || role.trim().isEmpty()) {
@@ -118,7 +108,6 @@ public class AdminUserService {
 
         return cleanRole;
     }
-
 
     private UserResponse mapToUserResponse(User user) {
         return new UserResponse(
