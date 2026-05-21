@@ -1,9 +1,11 @@
 package com.amanda.cinema.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -28,27 +30,26 @@ public class Booking {
     @JoinColumn(name = "showtime_id")
     private Showtime showtime;
 
-    // Seats
+    // Seats as comma-separated values: A1,A2,A3
     @Column(length = 500)
     private String seatNumbers;
 
     private Integer totalSeats;
 
-    // Total amount
     private BigDecimal totalAmount;
 
-    // Unique booking code
     @Column(unique = true)
     private String bookingCode;
 
-    // Booking status
     private String bookingStatus;
 
-    // Payment status
     private String paymentStatus;
 
-    // Booking created time
     private LocalDateTime bookingTime;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingSeat> bookingSeats;
 
     public Booking() {
     }
@@ -135,5 +136,13 @@ public class Booking {
 
     public void setBookingTime(LocalDateTime bookingTime) {
         this.bookingTime = bookingTime;
+    }
+
+    public List<BookingSeat> getBookingSeats() {
+        return bookingSeats;
+    }
+
+    public void setBookingSeats(List<BookingSeat> bookingSeats) {
+        this.bookingSeats = bookingSeats;
     }
 }
